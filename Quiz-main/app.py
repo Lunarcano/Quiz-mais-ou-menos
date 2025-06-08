@@ -15,17 +15,18 @@ for row in rows:
      print(row['year'])
 
 con.close()
+
 # ---------------------------- IMPORTAÇÕES ------------------------------------#
 import customtkinter as ctk 
 import random
 import json
-import os 
+import os
+from PIL import ImageTk, Image
 
 # --------------------------- CONFIGURAÇÕES -----------------------------------#
-ctk.set_appearance_mode("System")# APARÊNCIA (CLARO/ESCURO)
-app = ctk.CTk()# JANELA
-app.geometry("900x900")# TAMANHO JANELA
-app.title("Mais ou Menos?")# TITULO
+janela = ctk.CTk()
+janela.geometry("600x400")
+janela.title("Quiz Mais ou Menos")
 
 # ------------------------------- VARIÁVEIS -----------------------------------#
 indice_pergunta = 0
@@ -42,6 +43,37 @@ perguntas = [
     {"pergunta": "Ano de lançamento mais recente?3", "opcoes": ["Norbite", "As Branquelas"], "correta": "Norbite"},
     {"pergunta": "Ano de lançamento mais recente?4", "opcoes": ["Meninas malvadas", "Jumanji"], "correta": "Jumanji"},
 ]
+#-------------------------------- ICONES ---------------------------------------#
+# ICONE COMO JOGAR
+img_como_jogar = Image.open(r"C:\Users\bibia\Quiz-mais-ou-menos\Quiz-main\resources\como_jogar.png").resize((80, 70))
+img_como_jogar_tk = ImageTk.PhotoImage(img_como_jogar)
+
+#ICONE DO JOGO
+def mostrar_icone():
+    icone_label.place(relx=0.5, y=30, anchor="n")
+
+def esconder_icone():
+    icone_label.place_forget()
+    
+# ICONE DAS VIDAS
+img_cheio = Image.open(r"C:\Users\bibia\Quiz-mais-ou-menos\Quiz-main\resources\coracao_cheio.png").resize((50, 50))
+img_vazio = Image.open(r"C:\Users\bibia\Quiz-mais-ou-menos\Quiz-main\resources\coracao_vazio.png").resize((40, 40))
+img_cheio_tk = ImageTk.PhotoImage(img_cheio)
+img_vazio_tk = ImageTk.PhotoImage(img_vazio)
+
+#------------------------------- ATUALIZAR VIDAS ------------------------------#
+def atualizar_vidas():
+    # LIMPA VIDA ANTIGA
+    for widget in frame_vidas.winfo_children():
+        widget.destroy()
+
+    # COLOCA VIDA NOVA
+    for i in range(3):
+        img = img_cheio_tk if i < vidas else img_vazio_tk
+        label = ctk.CTkLabel(frame_vidas, image=img, text="")
+        label.pack(side="left", padx=2)
+        vidas_imagens.append(label)
+
 # ----------------------------- INICIAR JOGO ----------------------------------#
 def iniciar_quiz():
     global indice_pergunta, pontuacao, vidas
@@ -49,12 +81,35 @@ def iniciar_quiz():
     pontuacao = 0
     vidas = 3
     random.shuffle(perguntas)
-    pontuacao_label.configure(text=f"Pontuação: {pontuacao} | Vidas {vidas}")
+    pontuacao_label.configure(text=f"Pontuação: {pontuacao}")
     tabela.place_forget()
     frame_usuario.place_forget()
     frame_inicial.place_forget()
-    frame_quiz.place(relx=0.5, rely=0.5, anchor="center")
+    frame_quiz.place(relx=0.5, rely=0.7, anchor="center")
+    frame_vidas.place(relx=0.98, rely=0.02, anchor="ne")  # REAPARE VIDAS
+    botao_como_jogar.place_forget()
     carregar_pergunta()
+    atualizar_vidas()
+    mostrar_icone()
+
+#--------------------------------- COMO JOGAR --------------------------------#
+def mostrar_como_jogar():
+    frame_inicial.place_forget()
+    tabela.place_forget()
+    frame_usuario.place_forget()
+    frame_quiz.place_forget()
+    frame_como_jogar.place(relx=0.5, rely=0.5, anchor="center")
+    botao_como_jogar.place_forget()
+    esconder_icone()
+    
+#------------------------------- DESISTIR DE JOGAR ---------------------------#
+def desistir():
+    global pontos, vidas
+    pontos = 0
+    vidas = 3
+    frame_quiz.place_forget()
+    frame_vidas.place_forget()
+    voltar_ao_inicio()
 
 #------------------------------ PERGUNTA ATUAL --------------------------------#
 def carregar_pergunta(): 
@@ -62,7 +117,8 @@ def carregar_pergunta():
     pergunta_atual = perguntas[indice_pergunta]
     pergunta_label.configure(text=pergunta_atual['pergunta'])# PERGUNTA
     botao_opcao1.configure(text=pergunta_atual["opcoes"][0])# BOTÃO PRIMEIRA OPÇÃO  
-    botao_opcao2.configure(text=pergunta_atual["opcoes"][1])# BOTÃO SEGUNDA OPÇÃO    
+    botao_opcao2.configure(text=pergunta_atual["opcoes"][1])# BOTÃO SEGUNDA OPÇÃO)
+    
 
 #---------------------------- VERIFICAR RESPOSTA-------------------------------#
 def verificar_resposta(opcao_escolhida): 
@@ -74,24 +130,27 @@ def verificar_resposta(opcao_escolhida):
     # SE ERRAR
     else:
         vidas -= 1 # PERDE VIDA
-    pontuacao_label.configure(text=f"Pontuação: {pontuacao} | Vidas {vidas}")
+        atualizar_vidas()
+    pontuacao_label.configure(text=f"Pontuação: {pontuacao}")
     # SE AINDA TIVER VIDA
     if vidas > 0:
         indice_pergunta += 1
         if indice_pergunta < len(perguntas):
             carregar_pergunta()
         else:
-            finalizar_quiz("Parabéns! Você completou todas as perguntas.")
+            finalizar_quiz("Obrigado por jogar!\n")
     # SE NÃO TIVER VIDA
     else:
-        finalizar_quiz("Fim de jogo! Você não tem mais vidas.")
+        finalizar_quiz("Você não tem mais vidas :(\n")
 
 #------------------------------ FINAL DO JOGO ---------------------------------#
 def finalizar_quiz(mensagem):
     frame_quiz.place_forget()
-    entrada_nome_label.configure(text=mensagem + "\nDigite seu nome e email:")
-    frame_usuario.place(relx=0.5, rely=0.5, anchor="center")
+    frame_vidas.place_forget()  # ESCONDE VIDAS
+    entrada_nome_label.configure(text=mensagem + "\nSalve sua pontuação\nDigite seu nome e email:")
+    frame_usuario.place(relx=0.5, rely=0.6, anchor="center")
     botao_salvar.pack(pady=10)
+    mostrar_icone()
 
 #------------------------------ SALVA PONTUAÇÃO--------------------------------#
 def salvar_score():
@@ -110,6 +169,8 @@ def salvar_usuario():
         frame_usuario.place_forget()
         atualizar_tabela()
         tabela.place(relx=0.5, rely=0.5, anchor="center")
+        esconder_icone()
+        botao_como_jogar.place_forget()
 
 #---------------------------- ATUALIZAR RANKING -------------------------------#
 def atualizar_tabela():
@@ -119,13 +180,14 @@ def atualizar_tabela():
     for widget in tabela.winfo_children():
         widget.destroy()
 
-    ctk.CTkLabel(tabela, text="Usuários cadastrados", font=ctk.CTkFont(size=16, weight="bold")).pack(pady=10)
+    ctk.CTkLabel(tabela, text="Ranking", font=ctk.CTkFont(size=24, weight="bold")).pack(pady=10)
     usuarios_ordenados = sorted(usuarios, key=lambda x: x["pontuacao"], reverse=True)
 
     for i, user in enumerate(usuarios_ordenados): #EM ORDEM DECRECENTE
-        texto = f"{user['nome']} | {user['email']} | Pontuação: {user['pontuacao']}"
+        posicao = i + 1
+        texto = f"{posicao}º - {user['nome']} | {user['email']} | Pontuação: {user['pontuacao']}"
         botao = ctk.CTkButton(
-            tabela, text=texto, font=ctk.CTkFont(size=14),
+            tabela, text=texto, font=ctk.CTkFont(size=15),
             fg_color="#DDD",# COR DE FUNDO
             hover_color="#CCC",# COR COM MAUSE
             text_color="black",# COR TEXTO
@@ -134,6 +196,7 @@ def atualizar_tabela():
         )
         botao.pack(pady=2)
         botoes_usuarios.append(botao)
+        
     # BOTÕES (EDITAR, DELETAR E JOGAR)
     botoes_acao = ctk.CTkFrame(tabela)
     botoes_acao.pack(pady=10)
@@ -181,16 +244,20 @@ def mostrar_ranking():
     frame_inicial.place_forget()
     atualizar_tabela()
     tabela.place(relx=0.5, rely=0.5, anchor="center")
+    botao_como_jogar.place_forget()
+    esconder_icone()
 
 #----------------------- VOLTAR PARA O MENU INICIAL ----------------------------#
 def voltar_ao_inicio():
     tabela.place_forget()
     frame_usuario.place_forget()
     frame_quiz.place_forget()
+    frame_como_jogar.place_forget()
     frame_inicial.place(relx=0.5, rely=0.5, anchor="center")
+    botao_como_jogar.place(relx=0.01, rely=0.01, anchor="nw")
+    mostrar_icone()
 
 # --------------------------- ARQUIVO USUARIOS ---------------------------------#
-
 def salvar_dados():
     with open("usuarios.json", "w") as f:
         json.dump(usuarios, f)
@@ -202,35 +269,69 @@ def carregar_dados():
             usuarios = json.load(f)
 
 # -------------------------- FRAME E BOTÕES INICIAL ----------------------------#
-
-frame_inicial = ctk.CTkFrame(app, width=400, height=400)
+#FRAME INICIAL
+frame_inicial = ctk.CTkFrame(janela)
 frame_inicial.place(relx=0.5, rely=0.5, anchor="center")
-frame_inicial.pack_propagate(False)
 
-#TITULO
-titulo = ctk.CTkLabel(frame_inicial, text="Mais ou Menos?", font=ctk.CTkFont(size=20, weight="bold"))
-titulo.pack(pady=10)
+# FRAME COMO JOGAR
+frame_como_jogar = ctk.CTkFrame(janela, fg_color="black")
+label_instrucao = ctk.CTkLabel(
+    frame_como_jogar, 
+    text="COMO JOGAR:\n",
+    font=ctk.CTkFont(size=14), 
+    justify="left",
+    wraplength=400,
+    text_color="white"
+)
+label_instrucao.pack(padx=20, pady=20)
 
-#BOTÕES
-botoes_iniciais = ctk.CTkFrame(frame_inicial)
-botoes_iniciais.pack(pady=10)
+# ICONE JOGO
+icone = Image.open(r"C:\Users\bibia\Quiz-mais-ou-menos\Quiz-main\resources\icone.png").resize((100, 100))
+icone_tk = ctk.CTkImage(light_image=icone, dark_image=icone, size=(100, 100))
+
+# LABEL ICONE JOGO
+icone_label = ctk.CTkLabel(master=janela, image=icone_tk, text="", fg_color="transparent")
+icone_label.place(relx=0.5, y=30, anchor="n")  # CENTRALIZADO
+
+# BOTÕES
+botoes_iniciais = ctk.CTkFrame(frame_inicial, fg_color="transparent")
+botoes_iniciais.grid(row=1, column=0)
 
 botao_iniciar = ctk.CTkButton(botoes_iniciais, text="Iniciar", command=iniciar_quiz, fg_color="black", hover_color="#333")
-botao_iniciar.pack(side="left", padx=10)
+botao_iniciar.grid(row=0, column=0, padx=10)
 
-#RANKING
+# BOTÃO VOLTAR (COMO JOGAR)
+botao_voltar_como_jogar = ctk.CTkButton(
+    frame_como_jogar, text="Voltar", fg_color="black", hover_color="#333", command=voltar_ao_inicio
+)
+botao_voltar_como_jogar.pack(pady=10)
+
+# BOTÃO COMO JOGAR
+botao_como_jogar = ctk.CTkButton(
+    janela, image=img_como_jogar_tk, text="", 
+    width=100, height=40,
+    fg_color="transparent", hover_color="#444", 
+    command=mostrar_como_jogar
+)
+botao_como_jogar.place(relx=0.01, rely=0.01, anchor="nw")
+
+# BOTÃO RANKING
 botao_ranking = ctk.CTkButton(botoes_iniciais, text="Ranking", command=mostrar_ranking, fg_color="black", hover_color="#333")
-botao_ranking.pack(side="left", padx=10)
+botao_ranking.grid(row=0, column=1, padx=10)
 
 #---------------------------- FRAME E BOTÕES JOGO ------------------------------#
-frame_quiz = ctk.CTkFrame(app, width=300, height=250)
+frame_quiz = ctk.CTkFrame(janela, width=300, height=250, fg_color="transparent")
 frame_quiz.pack_propagate(False)
+# FRAME VIDAS
+frame_vidas = ctk.CTkFrame(janela, fg_color="transparent")
+frame_vidas.place(relx=0.98, rely=0.02, anchor="ne")
+vidas_imagens = []
 
 #PERGUNTA
-pergunta_label = ctk.CTkLabel(frame_quiz, text="", wraplength=280, font=ctk.CTkFont(size=16))
+pergunta_label = ctk.CTkLabel(frame_quiz, text="", wraplength=280, font=ctk.CTkFont(size=24))
 pergunta_label.pack(pady=(10, 10))
 
-#BOTÕES
+#BOTÕES OPÇÕES
 botoes_opcoes = ctk.CTkFrame(frame_quiz)
 botoes_opcoes.pack(pady=5)
 
@@ -240,14 +341,22 @@ botao_opcao1.pack(side="left", padx=10)
 botao_opcao2 = ctk.CTkButton(botoes_opcoes, text="", command=lambda: verificar_resposta(botao_opcao2.cget("text")), fg_color="black", hover_color="#333")
 botao_opcao2.pack(side="left", padx=10)
 
-#PONTUAÇÃO E VIDA
-pontuacao_label = ctk.CTkLabel(frame_quiz, text="Pontuação: 0 | Vidas 3")
-pontuacao_label.pack(pady=(10, 0))
+#PONTUAÇÃO
+pontuacao_label = ctk.CTkLabel(
+    frame_quiz,
+    text="Pontuação: 0",
+    font=ctk.CTkFont(size=24, weight="bold")
+)
+pontuacao_label.pack(pady=(10, 10))
+
+# BOTÃO DESISTIR
+botao_desistir = ctk.CTkButton(frame_quiz, text="Desistir", command=desistir, fg_color="black", hover_color="#333")
+botao_desistir.pack(pady=(5, 10))
 
 #-------------------------------- FRAME USUARIO -------------------------------#
-frame_usuario = ctk.CTkFrame(app)
+frame_usuario = ctk.CTkFrame(janela, fg_color="transparent")
 
-entrada_nome_label = ctk.CTkLabel(frame_usuario, text="Digite seu nome e email:", font=ctk.CTkFont(size=16))
+entrada_nome_label = ctk.CTkLabel(frame_usuario, text="Digite seu nome e email:", font=ctk.CTkFont(size=20))
 entrada_nome_label.pack(pady=(10, 5))
 
 entrada_nome = ctk.CTkEntry(frame_usuario, placeholder_text="Nome", width=300, font=ctk.CTkFont(size=14))
@@ -256,9 +365,10 @@ entrada_nome.pack(pady=5)
 entrada_email = ctk.CTkEntry(frame_usuario, placeholder_text="Email", width=300, font=ctk.CTkFont(size=14))
 entrada_email.pack(pady=5)
 
+# BOTÃO SALVAR
 botao_salvar = ctk.CTkButton(frame_usuario, text="Salvar Pontuação", command=salvar_usuario, fg_color="black", hover_color="#333")
 
 # -------------------------------- EXECUÇÃO -----------------------------------#
-tabela = ctk.CTkFrame(app)
+tabela = ctk.CTkFrame(janela)
 carregar_dados()
-app.mainloop()
+janela.mainloop()
