@@ -15,6 +15,56 @@ for row in rows:
      print(row['year'])
 
 con.close()
+# ---------------------- BANCO DE DADOS QUIZ ------------------------------------ #
+BASE_DE_DADOS = 'quiz.db'
+
+def conectar_banco():
+    try:
+        conn = sqlite3.connect(BASE_DE_DADOS)
+        cursor = conn.cursor()
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS perguntas (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                pergunta_texto TEXT NOT NULL,
+                filme_a TEXT NOT NULL,
+                filme_b TEXT NOT NULL,
+                resposta_correta TEXT NOT NULL
+            )
+        ''')
+        conn.commit()
+        return conn
+    except sqlite3.Error as e:
+        print(f"Erro no banco de dados: {e}")
+        return None
+
+def atualizar_perguntas(conn, sobrescrever=False):
+    cursor = conn.cursor()
+
+    perguntas_novas = [
+        ("Ano de lançamento mais recente?", "Senhor dos Anéis1", "Matilda", "Matilda"),
+        ("Ano de lançamento mais recente?2", "Orgulho e Preconceito", "Pânico", "Orgulho e Preconceito"),
+        ("Ano de lançamento mais recente?3", "Norbit", "As Branquelas", "Norbit"),
+        ("Ano de lançamento mais recente?4", "Meninas Malvadas", "Jumanji", "Jumanji"),
+    ]
+
+    if sobrescrever:
+        cursor.execute("DELETE FROM perguntas")
+        conn.commit()
+
+    # Verifica quais perguntas já existem
+    cursor.execute("SELECT pergunta_texto FROM perguntas")
+    existentes = set(row[0] for row in cursor.fetchall())
+
+    novas_para_inserir = [
+        pergunta for pergunta in perguntas_novas if pergunta[0] not in existentes
+    ]
+
+    if novas_para_inserir:
+        cursor.executemany('''
+            INSERT INTO perguntas (pergunta_texto, filme_a, filme_b, resposta_correta)
+            VALUES (?, ?, ?, ?)
+        ''', novas_para_inserir)
+        conn.commit()
 
 # ---------------------------- IMPORTAÇÕES ------------------------------------#
 import customtkinter as ctk 
@@ -39,14 +89,30 @@ vidas = 3 #TOTAL DE TENTATIVAS
 usuarios = []
 botoes_usuarios = []
 usuario_selecionado = None
+perguntas = []
 
-#--------------------------- PERGUNTAS COM RESPOSTAS---------------------------#
-perguntas = [ 
-    {"pergunta": "Ano de lançamento mais recente?1", "opcoes": ["Senhor dos Anéis", "Matilda"], "correta": "Matilda"},
-    {"pergunta": "Ano de lançamento mais recente?2", "opcoes": ["Orgulho e preconceito", "Pânico"], "correta": "Orgulho e preconceito"},
-    {"pergunta": "Ano de lançamento mais recente?3", "opcoes": ["Norbite", "As Branquelas"], "correta": "Norbite"},
-    {"pergunta": "Ano de lançamento mais recente?4", "opcoes": ["Meninas malvadas", "Jumanji"], "correta": "Jumanji"},
-]
+#CARREGAR PERGUNTA
+def carregar_perguntas(conn):
+    global perguntas
+    cursor = conn.cursor()
+    cursor.execute("SELECT pergunta_texto, filme_a, filme_b, resposta_correta FROM perguntas")
+    resultado = cursor.fetchall()
+
+    perguntas = []
+    for texto, a, b, correta in resultado:
+        perguntas.append({
+            "pergunta": texto,
+            "opcoes": [a, b],
+            "correta": correta
+        })
+
+    random.shuffle(perguntas)
+
+conn = conectar_banco()
+if conn:
+    atualizar_perguntas(conn, sobrescrever=True)  # True = apaga tudo e adiciona
+    # atualizar_perguntas(conn, sobrescrever=False)  # False = adiciona apenas novas
+print(perguntas)
 #-------------------------------- ICONES ---------------------------------------#
 # ICONE COMO JOGAR
 img_como_jogar = Image.open(r"C:Quiz-main\resources\como_jogar.png").resize((80, 70))
@@ -84,7 +150,7 @@ def iniciar_quiz():
     indice_pergunta = 0
     pontuacao = 0
     vidas = 3
-    random.shuffle(perguntas)
+    carregar_perguntas(conn)
     pontuacao_label.configure(text=f"Pontuação: {pontuacao}")
     tabela.place_forget()
     frame_usuario.place_forget()
@@ -118,12 +184,13 @@ def desistir():
 #------------------------------ PERGUNTA ATUAL --------------------------------#
 def carregar_pergunta(): 
     global indice_pergunta
-    pergunta_atual = perguntas[indice_pergunta]
-    pergunta_label.configure(text=pergunta_atual['pergunta'])# PERGUNTA
-    botao_opcao1.configure(text=pergunta_atual["opcoes"][0])# BOTÃO PRIMEIRA OPÇÃO  
-    botao_opcao2.configure(text=pergunta_atual["opcoes"][1])# BOTÃO SEGUNDA OPÇÃO)
-    
+    if indice_pergunta < len(perguntas):
+        pergunta_atual = perguntas[indice_pergunta]
+        pergunta_label.configure(text=pergunta_atual['pergunta'])  # Corrige a chave
+        botao_opcao1.configure(text=pergunta_atual["opcoes"][0])   # Corrige acesso à lista
+        botao_opcao2.configure(text=pergunta_atual["opcoes"][1])   # Corrige acesso à lista
 
+    
 #---------------------------- VERIFICAR RESPOSTA-------------------------------#
 def verificar_resposta(opcao_escolhida): 
     global indice_pergunta, pontuacao, vidas 
@@ -231,7 +298,7 @@ def atualizar_tabela():
             user = usuarios_ordenados[idx]
             label_nome = ctk.CTkLabel(
                 frame_podio,
-                text=f"{idx+1}º - {user['nome']} PTS({user['pontuacao']})",
+                text=f"{idx+1}º - {user['nome']}({user['pontuacao']})",
                 font=ctk.CTkFont(size=12),
                 cursor="hand2"
             )
