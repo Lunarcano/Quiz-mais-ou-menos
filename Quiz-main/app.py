@@ -35,44 +35,43 @@ def atualizar_perguntas(conn, sobrescrever=False):
 
     perguntas_novas = [
         ("Ano de lançamento mais recente?", "Senhor dos Anéis", "Matilda", "Matilda"),
-        ("Ano de lançamento mais recente?2", "Orgulho e Preconceito", "Pânico", "Orgulho e Preconceito"),
-        ("Ano de lançamento mais recente?3", "Norbit", "As Branquelas", "Norbit"),
-        ("Ano de lançamento mais recente?4", "Meninas Malvadas", "Jumanji", "Jumanji"),
-        ("Ano de lançamento mais recente?", "Shrek", "De Repente 30", "De Repente 30"),
-        ("Ano de lançamento mais recente?", "O Pequenino", "Ponyo: Uma Amizade que Veio do Mar", "Ponyo: Uma Amizade que Veio do Mar"),
+        ("Ano de lançamento mais recente?", "Orgulho e Preconceito", "Pânico", "Orgulho e Preconceito"),
+        ("Ano de lançamento mais recente?", "Norbit", "As Branquelas", "Norbit"),
+        ("Ano de lançamento mais antigo?", "Meninas Malvadas", "Jumanji", "Meninas Malvadas"),
+        ("Ano de lançamento mais antigo?", "Shrek", "De Repente 30", "Shrek"),
+        ("Ano de lançamento mais antigo?", "O Pequenino", "Ponyo: Uma Amizade que Veio do Mar", "O Pequenino"),
         ("Qual filme foi mais indicado para premiações?", "Marcas da Maldição", "As Patricinhas de Beverly Hills", "Marcas da Maldição"),
         ("Qual filme foi mais indicado para premiações?", "O Poço", "Meninas Malvadas", "Meninas Malvadas"),
         ("Qual filme foi mais indicado para premiações?", "Nosferatu: O vampiro da noite", "Gasparzinho, o Fantasminha Camarada", "Nosferatu: O vampiro da noite"),
-        ("Qual filme foi mais indicado para premiações?", "Jogos Vorazes", "Star Wars: Episódio I - A Ameaça Fantasma", "Star Wars: Episódio I - A Ameaça Fantasma"),
-        ("Qual filme foi mais indicado para premiações?", "O Máskara", "Clube da Luta", "Clube da Luta"),
-        ("Qual filme foi mais indicado para premiações?", "V de Vingaça", "O Espetacular Homem-Aranha", "V de Vingaça"),
+        ("Qual filme foi menos indicado para premiações?", "Jogos Vorazes", "Star Wars: Episódio I - A Ameaça Fantasma", "Jogos Vorazes"),
+        ("Qual filme foi menos indicado para premiações?", "O Máskara", "Clube da Luta", "O Máskara"),
+        ("Qual filme foi menos indicado para premiações?", "V de Vingaça", "O Espetacular Homem-Aranha", "O Espetacular Homem-Aranha"),
         ("Qual filme recebeu mais OSCARS?", "Barbie", "Star Wars: Episódio I - A Ameaça Fantasma", "Barbie"),
         ("Qual filme recebeu mais OSCARS?", "Orgulho e Preconceito ", "Shrek", "Shrek"),
         ("Qual filme recebeu mais OSCARS?", "O Senhor dos Anéis: A Sociedade do Anel", "Corra!", "O Senhor dos Anéis: A Sociedade do Anel"),
-        ("Qual filme recebeu mais OSCARS?", "Interestelar", "O Exorcista", "O Exorcista"),
-        ("Qual filme recebeu mais OSCARS?", "Matrix", "Batman: O Cavaleiro das Trevas", "Matrix"),
-        ("Qual filme recebeu mais OSCARS?", "Jurassic Park: O Parque dos Dinossauros", "Alien, o 8º Passageiro", "Jurassic Park: O Parque dos Dinossauros"),
+        ("Qual filme recebeu menos OSCARS?", "Interestelar", "O Exorcista", "Interestelar"),
+        ("Qual filme recebeu menos OSCARS?", "Matrix", "Batman: O Cavaleiro das Trevas", "Batman: O Cavaleiro das Trevas"),
+        ("Qual filme recebeu menos OSCARS?", "Jurassic Park: O Parque dos Dinossauros", "Alien, o 8º Passageiro", "Alien, o 8º Passageiro"),
         ("Qual filme tem a maior nota no IMDb?", "Os Caça-Fantasmas", "Como Eu Era Antes de Você ", "Os Caça-Fantasmas"),
         ("Qual filme tem a maior nota no IMDb?", "O Melhor Amiga da Noiva ", "Kung Fu Panda", "Kung Fu Panda"),
         ("Qual filme tem a maior nota no IMDb?", "Harry Potter e a Pedra Filosofal", "Clube da Luta", "Clube da Luta"),
         ("Qual filme tem a maior nota no IMDb?", "50 tons de cinza", "A Hora do Pesadelo 6: Pesadelo Final", "A Hora do Pesadelo 6: Pesadelo Final"),
         ("Qual filme tem a maior nota no IMDb?", "Alien vs. Predador", "Sharknado", "Alien vs. Predador"),
-        ("Qual filme tem a maior nota no IMDb?", "Amnésia", "Os Vingadores", "Amnésia"),
-        ("Qual filme tem a maior nota no IMDb?", "O Estranho Mundo de Jack", "Coraline e o Mundo Secreto", "O Estranho Mundo de Jack"),
-        ("Qual filme tem a maior nota no IMDb?", "Karatê Kid", "Zathura: Uma Aventura Espacial", "Zathura: Uma Aventura Espacial"),
-        ("Qual filme tem a maior nota no IMDb?", "Matrix", "Pânico", "Matrix"),
-        ("Qual filme tem a maior nota no IMDb?", "Barbie", "V de Vingaça", "V de Vingaça"),
-        ("Qual filme tem a maior nota no IMDb?", "O Exorcista", "As Patricinhas de Beverly Hills", "O Exorcista"),
+        ("Qual filme tem a menor nota no IMDb?", "Amnésia", "Os Vingadores", "Os Vingadores"),
+        ("Qual filme tem a menor nota no IMDb?", "O Estranho Mundo de Jack", "Coraline e o Mundo Secreto", "Coraline e o Mundo Secreto"),
+        ("Qual filme tem a menor nota no IMDb?", "Karatê Kid", "Zathura: Uma Aventura Espacial", "Karatê Kid"),
+        ("Qual filme tem a menor nota no IMDb?", "Matrix", "Pânico", "ânico"),
+        ("Qual filme tem a menor nota no IMDb?", "Barbie", "V de Vingaça", "Barbie"),
+        ("Qual filme tem a menor nota no IMDb?", "O Exorcista", "As Patricinhas de Beverly Hills", "As Patricinhas de Beverly Hills"),
         ("Qual filme tem o maior tempo de duração?", "Alien, o 8º Passageiro", "Maze Runner: Correr ou Morrer", "Alien, o 8º Passageiro"),
         ("Qual filme tem o maior tempo de duração?", "Matrix", "O Senhor dos Anéis: A Sociedade do Anel", "O Senhor dos Anéis: A Sociedade do Anel"),
         ("Qual filme tem o maior tempo de duração?", "Alvin e os Esquilos", "Segurança de Shopping", "Alvin e os Esquilos"),
         ("Qual filme tem o maior tempo de duração?", "A Casa Monstro", "Uma Noite no Museu", "Uma Noite no Museu"),
-        ("Qual filme tem o maior tempo de duração?", "A Noiva-Cadáver", "O Espetacular Homem-Aranha", "O Espetacular Homem-Aranha"),
-        ("Qual filme tem o maior tempo de duração?", "As Aventuras de Sharkboy e Lavagirl", "Gasparzinho, o Fantasminha Camarada", "Gasparzinho, o Fantasminha Camarada"),
-        ("Qual filme tem o maior tempo de duração?", "O Poço", "Meninas Malvadas", "Meninas Malvadas"),
-        ("Qual filme tem o maior tempo de duração?", "Jogos Vorazes", "50 tons de cinza", "Jogos Vorazes"),
-        
-        
+        ("Qual filme tem o menor tempo de duração?", "A Noiva-Cadáver", "O Espetacular Homem-Aranha", "A Noiva-Cadáver"),
+        ("Qual filme tem o menor tempo de duração?", "As Aventuras de Sharkboy e Lavagirl", "Gasparzinho, o Fantasminha Camarada", "As Aventuras de Sharkboy e Lavagirl"),
+        ("Qual filme tem o menor tempo de duração?", "O Poço", "Meninas Malvadas", "O Poço"),
+        ("Qual filme tem o menor tempo de duração?", "Jogos Vorazes", "50 tons de cinza", "50 tons de cinza"),
+            
     ]
 
     if sobrescrever:
@@ -485,14 +484,14 @@ pergunta_label = ctk.CTkLabel(frame_quiz, text="", wraplength=280, font=ctk.CTkF
 pergunta_label.pack(pady=(10, 10))
 
 #BOTÕES OPÇÕES
-botoes_opcoes = ctk.CTkFrame(frame_quiz)
-botoes_opcoes.pack(pady=5)
+botoes_opcoes = ctk.CTkFrame(frame_quiz, width=350)
+botoes_opcoes.pack(pady=5, fill="x", expand=True)
 
 botao_opcao1 = ctk.CTkButton(botoes_opcoes, text="", command=lambda: verificar_resposta(botao_opcao1.cget("text")), fg_color="black", hover_color="#333")
-botao_opcao1.pack(side="left", padx=10)
+botao_opcao1.pack(pady=10, padx=10, fill="x")
 
 botao_opcao2 = ctk.CTkButton(botoes_opcoes, text="", command=lambda: verificar_resposta(botao_opcao2.cget("text")), fg_color="black", hover_color="#333")
-botao_opcao2.pack(side="left", padx=10)
+botao_opcao2.pack(pady=10, padx=10, fill="x")
 
 #PONTUAÇÃO
 pontuacao_label = ctk.CTkLabel(
