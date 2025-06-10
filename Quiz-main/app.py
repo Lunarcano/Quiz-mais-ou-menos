@@ -1,20 +1,13 @@
-# Conectando Banco de Dados
-import pandas as pd
-arquivo = 'Quiz-main\Resources\world_imdb_movies_top_movies_per_year.csv'
-df = pd.read_csv(arquivo, sep=',', header = 0)
-
+# ---------------------------- IMPORTANDO AS BIBLIOTECAS ------------------------ #
 import sqlite3
+import random
+import json
+import os
+import re
+import customtkinter as ctk
+from PIL import Image
+from tkinter import messagebox
 
-con = sqlite3.connect('imdb.db') # Criando o banco de dados com o nome "imdb"
-con.row_factory = sqlite3.Row
-df.to_sql('movies', con, if_exists='replace', index=False)
-rows = con.execute('SELECT * FROM movies LIMIT 2').fetchall()
-
-for row in rows:
-     print(dict(row))
-     print(row['year'])
-
-con.close()
 # ---------------------- BANCO DE DADOS QUIZ ------------------------------------ #
 BASE_DE_DADOS = 'quiz.db'
 
@@ -41,10 +34,45 @@ def atualizar_perguntas(conn, sobrescrever=False):
     cursor = conn.cursor()
 
     perguntas_novas = [
-        ("Ano de lançamento mais recente?", "Senhor dos Anéis1", "Matilda", "Matilda"),
+        ("Ano de lançamento mais recente?", "Senhor dos Anéis", "Matilda", "Matilda"),
         ("Ano de lançamento mais recente?2", "Orgulho e Preconceito", "Pânico", "Orgulho e Preconceito"),
         ("Ano de lançamento mais recente?3", "Norbit", "As Branquelas", "Norbit"),
         ("Ano de lançamento mais recente?4", "Meninas Malvadas", "Jumanji", "Jumanji"),
+        ("Ano de lançamento mais recente?", "Shrek", "De Repente 30", "De Repente 30"),
+        ("Ano de lançamento mais recente?", "O Pequenino", "Ponyo: Uma Amizade que Veio do Mar", "Ponyo: Uma Amizade que Veio do Mar"),
+        ("Qual filme foi mais indicado para premiações?", "Marcas da Maldição", "As Patricinhas de Beverly Hills", "Marcas da Maldição"),
+        ("Qual filme foi mais indicado para premiações?", "O Poço", "Meninas Malvadas", "Meninas Malvadas"),
+        ("Qual filme foi mais indicado para premiações?", "Nosferatu: O vampiro da noite", "Gasparzinho, o Fantasminha Camarada", "Nosferatu: O vampiro da noite"),
+        ("Qual filme foi mais indicado para premiações?", "Jogos Vorazes", "Star Wars: Episódio I - A Ameaça Fantasma", "Star Wars: Episódio I - A Ameaça Fantasma"),
+        ("Qual filme foi mais indicado para premiações?", "O Máskara", "Clube da Luta", "Clube da Luta"),
+        ("Qual filme foi mais indicado para premiações?", "V de Vingaça", "O Espetacular Homem-Aranha", "V de Vingaça"),
+        ("Qual filme recebeu mais OSCARS?", "Barbie", "Star Wars: Episódio I - A Ameaça Fantasma", "Barbie"),
+        ("Qual filme recebeu mais OSCARS?", "Orgulho e Preconceito ", "Shrek", "Shrek"),
+        ("Qual filme recebeu mais OSCARS?", "O Senhor dos Anéis: A Sociedade do Anel", "Corra!", "O Senhor dos Anéis: A Sociedade do Anel"),
+        ("Qual filme recebeu mais OSCARS?", "Interestelar", "O Exorcista", "O Exorcista"),
+        ("Qual filme recebeu mais OSCARS?", "Matrix", "Batman: O Cavaleiro das Trevas", "Matrix"),
+        ("Qual filme recebeu mais OSCARS?", "Jurassic Park: O Parque dos Dinossauros", "Alien, o 8º Passageiro", "Jurassic Park: O Parque dos Dinossauros"),
+        ("Qual filme tem a maior nota no IMDb?", "Os Caça-Fantasmas", "Como Eu Era Antes de Você ", "Os Caça-Fantasmas"),
+        ("Qual filme tem a maior nota no IMDb?", "O Melhor Amiga da Noiva ", "Kung Fu Panda", "Kung Fu Panda"),
+        ("Qual filme tem a maior nota no IMDb?", "Harry Potter e a Pedra Filosofal", "Clube da Luta", "Clube da Luta"),
+        ("Qual filme tem a maior nota no IMDb?", "50 tons de cinza", "A Hora do Pesadelo 6: Pesadelo Final", "A Hora do Pesadelo 6: Pesadelo Final"),
+        ("Qual filme tem a maior nota no IMDb?", "Alien vs. Predador", "Sharknado", "Alien vs. Predador"),
+        ("Qual filme tem a maior nota no IMDb?", "Amnésia", "Os Vingadores", "Amnésia"),
+        ("Qual filme tem a maior nota no IMDb?", "O Estranho Mundo de Jack", "Coraline e o Mundo Secreto", "O Estranho Mundo de Jack"),
+        ("Qual filme tem a maior nota no IMDb?", "Karatê Kid", "Zathura: Uma Aventura Espacial", "Zathura: Uma Aventura Espacial"),
+        ("Qual filme tem a maior nota no IMDb?", "Matrix", "Pânico", "Matrix"),
+        ("Qual filme tem a maior nota no IMDb?", "Barbie", "V de Vingaça", "V de Vingaça"),
+        ("Qual filme tem a maior nota no IMDb?", "O Exorcista", "As Patricinhas de Beverly Hills", "O Exorcista"),
+        ("Qual filme tem o maior tempo de duração?", "Alien, o 8º Passageiro", "Maze Runner: Correr ou Morrer", "Alien, o 8º Passageiro"),
+        ("Qual filme tem o maior tempo de duração?", "Matrix", "O Senhor dos Anéis: A Sociedade do Anel", "O Senhor dos Anéis: A Sociedade do Anel"),
+        ("Qual filme tem o maior tempo de duração?", "Alvin e os Esquilos", "Segurança de Shopping", "Alvin e os Esquilos"),
+        ("Qual filme tem o maior tempo de duração?", "A Casa Monstro", "Uma Noite no Museu", "Uma Noite no Museu"),
+        ("Qual filme tem o maior tempo de duração?", "A Noiva-Cadáver", "O Espetacular Homem-Aranha", "O Espetacular Homem-Aranha"),
+        ("Qual filme tem o maior tempo de duração?", "As Aventuras de Sharkboy e Lavagirl", "Gasparzinho, o Fantasminha Camarada", "Gasparzinho, o Fantasminha Camarada"),
+        ("Qual filme tem o maior tempo de duração?", "O Poço", "Meninas Malvadas", "Meninas Malvadas"),
+        ("Qual filme tem o maior tempo de duração?", "Jogos Vorazes", "50 tons de cinza", "Jogos Vorazes"),
+        
+        
     ]
 
     if sobrescrever:
@@ -66,14 +94,6 @@ def atualizar_perguntas(conn, sobrescrever=False):
         ''', novas_para_inserir)
         conn.commit()
 
-# ---------------------------- IMPORTAÇÕES ------------------------------------#
-import customtkinter as ctk 
-import random
-import json
-import os
-import re
-from PIL import ImageTk, Image
-from tkinter import messagebox
 
 # --------------------------- CONFIGURAÇÕES -----------------------------------#
 ctk.set_appearance_mode("light")  # Modo claro
@@ -115,8 +135,8 @@ if conn:
 print(perguntas)
 #-------------------------------- ICONES ---------------------------------------#
 # ICONE COMO JOGAR
-img_como_jogar = Image.open(r"C:Quiz-main\resources\como_jogar.png").resize((80, 70))
-img_como_jogar_tk = ImageTk.PhotoImage(img_como_jogar)
+img_como_jogar = Image.open(r"C:Quiz-main\resources\como_jogar.png").resize((32, 32))
+img_como_jogar_tk = ctk.CTkImage(img_como_jogar, size=(32,32))
 
 #ICONE DO JOGO
 def mostrar_icone():
@@ -126,10 +146,10 @@ def esconder_icone():
     icone_label.place_forget()
     
 # ICONE DAS VIDAS
-img_cheio = Image.open(r"C:Quiz-main\resources\coracao_cheio.png").resize((50, 50))
-img_vazio = Image.open(r"C:Quiz-main\resources\coracao_vazio.png").resize((40, 40))
-img_cheio_tk = ImageTk.PhotoImage(img_cheio)
-img_vazio_tk = ImageTk.PhotoImage(img_vazio)
+img_cheio = Image.open(r"C:Quiz-main\resources\coracao_cheio.png").resize((32, 32))
+img_vazio = Image.open(r"C:Quiz-main\resources\coracao_vazio.png").resize((26, 26))
+img_cheio_tk = ctk.CTkImage(img_cheio, size=(32,32))
+img_vazio_tk = ctk.CTkImage(img_vazio, size=(26,26))
 
 #------------------------------- ATUALIZAR VIDAS ------------------------------#
 def atualizar_vidas():
@@ -235,12 +255,12 @@ def salvar_usuario():
 
     # Verifica se os campos estão preenchidos
     if not nome or not email:
-        ctk.CTkMessagebox(title="Erro", message="Preencha todos os campos.", icon="cancel")
+        messagebox.showerror(title="Erro", message="Preencha todos os campos.")
         return
 
     # Verifica se o e-mail é válido
     if not email_valido(email):
-        messagebox.showerror("Erro", "Email inválido. Digite um e-mail válido.")
+        messagebox.showerror(title="Erro", message="Email inválido. Digite um e-mail válido.")
         return
 
     # Se estiver tudo certo, salva o usuário
@@ -279,8 +299,10 @@ def atualizar_tabela():
         frame_podio.pack(pady=10)
 
         # Imagem do pódio centralizada
-        img_podio = Image.open(r"C:Quiz-main\resources\ranking.png").resize((300, 300))
-        img_podio_tk = ImageTk.PhotoImage(img_podio)
+        img_podio = Image.open(r"C:Quiz-main\resources\ranking.png").resize(size=(250, 200))
+
+        img_podio_tk = ctk.CTkImage(img_podio, size=(250, 200))
+        
         label_podio = ctk.CTkLabel(frame_podio, image=img_podio_tk, text="")
         label_podio.image = img_podio_tk
         label_podio.place(relx=0.5, rely=0.5, anchor="center")
@@ -404,17 +426,11 @@ frame_como_jogar = ctk.CTkFrame(janela, fg_color="black")
 label_instrucao = ctk.CTkLabel(
     frame_como_jogar, 
     text="""COMO JOGAR:\n
-O jogo vai ser baseado em uma pergunta, retirada do\n
-banco de dados do IMDb (Internet movie database), a\n
-qual vai te dar duas opções de filmes, sendo uma\n
-delas correta. O objetivo seria acertar o máximo\n
-possível das perguntas, mas se acontecer de errar uma\n
-delas, sua vida ira diminuir.Então tome a decisão\n
-correta, para obter a maior pontuação!! Boa sorte.\n\n
-Observação:\n\n
--Você tem APENAS 3 vidas\n
--Pode desistir no meio do jogo! E NÃO irá salvar seu\n
-progresso, caso desista.""",
+Você receberá uma pergunta, retirada do nosso sistema. \n
+Todas as perguntas são baseadas nas informações fornecidas pelo banco de dados do IMDb (Internet movie database). \nApenas uma opção entre as duas está correta.\nSeu objetivo é acertar o máximo de perguntas possível, mas não se preocupe, se errar uma delas, o jogo continuará enquanto ainda tiver vidas sobrando.\n
+Tome a decisão correta para obter uma maior pontuação. \nBoa sorte!\n
+Observação:\nCaso desista durante o jogo, sua pontuação será perdida.
+""",
     font=ctk.CTkFont(size=14), 
     justify="left",
     wraplength=400,
@@ -423,8 +439,8 @@ progresso, caso desista.""",
 label_instrucao.pack(padx=20, pady=20)
 
 # ICONE JOGO
-icone = Image.open(r"C:Quiz-main\resources\icone.png").resize((100, 100))
-icone_tk = ctk.CTkImage(light_image=icone, dark_image=icone, size=(180, 180))
+icone = Image.open(r"C:Quiz-main\resources\icone.png").resize((141, 124))
+icone_tk = ctk.CTkImage(light_image=icone, dark_image=icone, size=(141, 124))
 
 # LABEL ICONE JOGO
 icone_label = ctk.CTkLabel(master=janela, image=icone_tk, text="", fg_color="white")
@@ -446,7 +462,7 @@ botao_voltar_como_jogar.pack(pady=10)
 # BOTÃO COMO JOGAR
 botao_como_jogar = ctk.CTkButton(
     janela, image=img_como_jogar_tk, text="", 
-    width=100, height=40,
+    width=80, height=70,
     fg_color="white", hover_color="#444", 
     command=mostrar_como_jogar
 )
@@ -457,10 +473,10 @@ botao_ranking = ctk.CTkButton(botoes_iniciais, text="Ranking", command=mostrar_r
 botao_ranking.grid(row=0, column=1, padx=10)
 
 #---------------------------- FRAME E BOTÕES JOGO ------------------------------#
-frame_quiz = ctk.CTkFrame(janela, width=300, height=250, fg_color="white")
+frame_quiz = ctk.CTkFrame(janela, width=300, height=250, fg_color="transparent")
 frame_quiz.pack_propagate(False)
 # FRAME VIDAS
-frame_vidas = ctk.CTkFrame(janela, fg_color="white")
+frame_vidas = ctk.CTkFrame(janela, fg_color="transparent")
 frame_vidas.place(relx=0.98, rely=0.02, anchor="ne")
 vidas_imagens = []
 
